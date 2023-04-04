@@ -17,6 +17,26 @@ BIRD_FEEDER_SCRIPT = "/path/to/bird_feeder.py"
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+### Keep in mind that exchange rates fluctuate, so you may want to update the price periodically based on current exchange rates. If you need to convert between currencies programmatically, you can use an API like Open Exchange Rates (https://openexchangerates.org/) to fetch the latest exchange rates.
+### Replace YOUR_OPEN_EXCHANGE_RATES_API_KEY with your Open Exchange Rates API key. You can use the get_exchange_rate function to convert between currencies and update the price in your bot accordingly.
+
+
+def get_exchange_rate(base_currency, target_currency):
+    api_key = "YOUR_OPEN_EXCHANGE_RATES_API_KEY"
+    url = f"https://openexchangerates.org/api/latest.json?app_id={api_key}&base={base_currency}&symbols={target_currency}"
+    response = requests.get(url)
+    data = response.json()
+    
+    if target_currency in data["rates"]:
+        return data["rates"][target_currency]
+    else:
+        raise ValueError("Invalid currency provided")
+
+# Example usage:
+usd_to_rub = get_exchange_rate("USD", "RUB")
+print("1 USD =", usd_to_rub, "RUB")
+
 def start(update: Update, context: CallbackContext):
     """Send a welcome message with inline keyboard."""
     keyboard = [
@@ -33,8 +53,11 @@ def donate_callback(update: Update, context: CallbackContext):
     payload = "Custom-Payload"  # You can use this field to store user-specific information.
     provider_token = PAYMENT_PROVIDER_TOKEN
     start_parameter = "bird-feeder-donation"
-    currency = "USD"
-    prices = [{"label": "Bird Feeding", "amount": 500}]  # 5 USD
+    currency = "RUB"
+    prices = [{"label": "Bird Feeding", "amount": 50000}]  # 500 RUB
+
+    # currency = "USD"
+    # prices = [{"label": "Bird Feeding", "amount": 500}]  # 5 USD
 
     context.bot.send_invoice(chat_id, title, description, payload, provider_token, start_parameter, currency, prices)
 
